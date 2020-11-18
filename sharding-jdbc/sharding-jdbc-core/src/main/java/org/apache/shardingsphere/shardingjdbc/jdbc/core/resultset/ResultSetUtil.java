@@ -17,17 +17,21 @@
 
 package org.apache.shardingsphere.shardingjdbc.jdbc.core.resultset;
 
+import java.math.BigDecimal;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.Date;
+
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import com.google.common.primitives.Shorts;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.apache.shardingsphere.underlying.common.exception.ShardingSphereException;
-
-import java.math.BigDecimal;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.Date;
 
 /**
  * ResultSet utility class.
@@ -48,6 +52,15 @@ public final class ResultSetUtil {
         } 
         if (value.getClass() == convertType) {
             return value;
+        }
+        if (LocalDateTime.class.equals(convertType)) {
+            return convertLocalDateTimeValue(value, convertType);
+        }
+        if (LocalDate.class.equals(convertType)) {
+            return convertLocalDateValue(value, convertType);
+        }
+        if (LocalTime.class.equals(convertType)) {
+            return convertLocalTimeValue(value, convertType);
         }
         if (value instanceof Number) {
             return convertNumberValue(value, convertType);
@@ -144,5 +157,20 @@ public final class ResultSetUtil {
             default:
                 return value;
         }
+    }
+
+    private static Object convertLocalDateTimeValue(final Object value, final Class<?> convertType) {
+        Timestamp timestamp = (Timestamp) value;
+        return timestamp.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+    }
+
+    private static Object convertLocalDateValue(final Object value, final Class<?> convertType) {
+        Timestamp timestamp = (Timestamp) value;
+        return timestamp.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    }
+
+    private static Object convertLocalTimeValue(final Object value, final Class<?> convertType) {
+        Timestamp timestamp = (Timestamp) value;
+        return timestamp.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
     }
 }
